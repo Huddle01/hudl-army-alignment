@@ -1,0 +1,746 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HUDL Army Alignment Quiz</title>
+  <style>
+    :root {
+      --primary: #4f46e5;
+      --primary-dark: #4338ca;
+      --secondary: #10b981;
+      --background: #111827;
+      --text: #f3f4f6;
+      --card-bg: #1f2937;
+      --accent: #8b5cf6;
+    }
+    
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background-color: var(--background);
+      color: var(--text);
+      margin: 0;
+      padding: 0;
+      line-height: 1.6;
+    }
+    
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 2rem 1rem;
+    }
+    
+    header {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+    
+    h1 {
+      font-size: 2.5rem;
+      margin-bottom: 0.5rem;
+      background: linear-gradient(90deg, var(--primary), var(--accent));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    
+    h2 {
+      font-size: 1.8rem;
+      margin-top: 2rem;
+      margin-bottom: 1rem;
+    }
+    
+    .logo {
+      margin-bottom: 1rem;
+      width: 120px;
+      height: 120px;
+      background-color: var(--text);
+      padding: 10px;
+      border-radius: 50%;
+    }
+    
+    .card {
+      background-color: var(--card-bg);
+      border-radius: 0.75rem;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    
+    .question {
+      margin-bottom: 2rem;
+    }
+    
+    .question-text {
+      font-size: 1.2rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+    }
+    
+    .options {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+    
+    .option {
+      background-color: rgba(79, 70, 229, 0.1);
+      border: 1px solid rgba(79, 70, 229, 0.2);
+      border-radius: 0.5rem;
+      padding: 1rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    
+    .option:hover {
+      background-color: rgba(79, 70, 229, 0.2);
+    }
+    
+    .option.selected {
+      background-color: rgba(79, 70, 229, 0.3);
+      border-color: var(--primary);
+    }
+    
+    .step {
+      display: none;
+    }
+    
+    .step.active {
+      display: block;
+    }
+    
+    .btn {
+      background-color: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 0.5rem;
+      padding: 0.75rem 1.5rem;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+    }
+    
+    .btn:hover {
+      background-color: var(--primary-dark);
+    }
+    
+    .btn:disabled {
+      background-color: #6b7280;
+      cursor: not-allowed;
+    }
+    
+    .btn-secondary {
+      background-color: transparent;
+      border: 1px solid var(--primary);
+      color: var(--primary);
+    }
+    
+    .btn-secondary:hover {
+      background-color: rgba(79, 70, 229, 0.1);
+    }
+    
+    .navigation {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 2rem;
+    }
+    
+    .progress-bar {
+      height: 0.5rem;
+      background-color: #374151;
+      border-radius: 9999px;
+      margin-bottom: 2rem;
+      overflow: hidden;
+    }
+    
+    .progress {
+      height: 100%;
+      background: linear-gradient(90deg, var(--primary), var(--accent));
+      border-radius: 9999px;
+      transition: width 0.3s ease;
+    }
+    
+    .twitter-input {
+      display: flex;
+      align-items: center;
+      background-color: rgba(255, 255, 255, 0.1);
+      border-radius: 0.5rem;
+      padding: 0.5rem 1rem;
+      margin-bottom: 1.5rem;
+    }
+    
+    .twitter-input span {
+      color: #9ca3af;
+      margin-right: 0.25rem;
+    }
+    
+    .twitter-input input {
+      background: transparent;
+      border: none;
+      color: var(--text);
+      font-size: 1rem;
+      width: 100%;
+      outline: none;
+    }
+    
+    .alignment-chart {
+      width: 100%;
+      height: 400px;
+      position: relative;
+      margin: 2rem 0;
+    }
+    
+    .alignment-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      grid-template-rows: repeat(3, 1fr);
+      gap: 0.5rem;
+      height: 100%;
+    }
+    
+    .alignment-cell {
+      background-color: rgba(255, 255, 255, 0.05);
+      border-radius: 0.5rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+      text-align: center;
+      font-size: 0.875rem;
+    }
+    
+    .alignment-cell.highlighted {
+      background-color: rgba(79, 70, 229, 0.3);
+      border: 2px solid var(--primary);
+    }
+    
+    .axis-label {
+      position: absolute;
+      font-size: 0.75rem;
+      color: #9ca3af;
+    }
+    
+    .x-axis-left {
+      left: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      writing-mode: vertical-rl;
+      text-orientation: mixed;
+    }
+    
+    .x-axis-right {
+      right: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      writing-mode: vertical-rl;
+      text-orientation: mixed;
+    }
+    
+    .y-axis-top {
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+    
+    .y-axis-bottom {
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+    
+    .result-card {
+      text-align: center;
+    }
+    
+    .result-title {
+      font-size: 1.5rem;
+      margin-bottom: 0.5rem;
+      color: var(--accent);
+    }
+    
+    .result-description {
+      margin-bottom: 1.5rem;
+    }
+    
+    .special-ability {
+      font-style: italic;
+      color: var(--secondary);
+      margin-bottom: 2rem;
+    }
+    
+    .share-buttons {
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+      margin-top: 1.5rem;
+    }
+    
+    .share-image {
+      width: 100%;
+      max-width: 500px;
+      margin: 0 auto;
+      border-radius: 0.75rem;
+      overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .quote {
+      font-style: italic;
+      text-align: center;
+      color: #9ca3af;
+      margin: 2rem 0;
+    }
+    
+    @media (max-width: 640px) {
+      .container {
+        padding: 1rem;
+      }
+      
+      h1 {
+        font-size: 1.8rem;
+      }
+      
+      .alignment-grid {
+        gap: 0.25rem;
+      }
+      
+      .alignment-cell {
+        padding: 0.5rem;
+        font-size: 0.75rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="logo">
+        <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+          <path fill="#4f46e5" d="M50,10 L90,30 L90,70 L50,90 L10,70 L10,30 Z"></path>
+          <text x="50" y="55" font-family="Arial" font-weight="bold" font-size="16" fill="white" text-anchor="middle">HUDL</text>
+        </svg>
+      </div>
+      <h1>🛡️ HUDL Army Alignment Quiz 🛡️</h1>
+      <p>Discover your place in the HUDLverse and share it with the community!</p>
+    </header>
+    
+    <div class="step active" id="step-1">
+      <div class="card">
+        <h2>Welcome, HUDLer!</h2>
+        <p>This quiz will help you discover your alignment in the HUDL Army. Enter your X handle to begin!</p>
+        
+        <div class="twitter-input">
+          <span>@</span>
+          <input type="text" id="twitter-handle" placeholder="Your X handle">
+        </div>
+        
+        <div class="navigation">
+          <div></div>
+          <button class="btn" id="start-btn">Start Quiz</button>
+        </div>
+      </div>
+    </div>
+    
+    <div class="step" id="step-2">
+      <div class="progress-bar">
+        <div class="progress" id="progress"></div>
+      </div>
+      
+      <div class="card" id="question-container">
+        <!-- Questions will be inserted here -->
+      </div>
+      
+      <div class="navigation">
+        <button class="btn btn-secondary" id="prev-btn">Previous</button>
+        <button class="btn" id="next-btn">Next</button>
+      </div>
+    </div>
+    
+    <div class="step" id="step-3">
+      <div class="card result-card">
+        <h2>Your HUDL Alignment</h2>
+        <div class="result-title" id="alignment-title"></div>
+        <p class="result-description" id="alignment-description"></p>
+        <p class="special-ability" id="special-ability"></p>
+        
+        <div class="alignment-chart">
+          <div class="axis-label x-axis-left">Node Operator</div>
+          <div class="axis-label x-axis-right">dApp Builder</div>
+          <div class="axis-label y-axis-top">Elder Council</div>
+          <div class="axis-label y-axis-bottom">Explorer</div>
+          
+          <div class="alignment-grid">
+            <div class="alignment-cell" data-alignment="Node Operator Elder">Node Operator Elder</div>
+            <div class="alignment-cell" data-alignment="Balanced Elder">Balanced Elder</div>
+            <div class="alignment-cell" data-alignment="dApp Builder Elder">dApp Builder Elder</div>
+            <div class="alignment-cell" data-alignment="Node Operator HUDLer">Node Operator HUDLer</div>
+            <div class="alignment-cell" data-alignment="True HUDLer">True HUDLer</div>
+            <div class="alignment-cell" data-alignment="dApp Builder HUDLer">dApp Builder HUDLer</div>
+            <div class="alignment-cell" data-alignment="Node Operator Explorer">Node Operator Explorer</div>
+            <div class="alignment-cell" data-alignment="Balanced Explorer">Balanced Explorer</div>
+            <div class="alignment-cell" data-alignment="dApp Builder Explorer">dApp Builder Explorer</div>
+          </div>
+        </div>
+        
+        <div class="share-buttons">
+          <button class="btn" id="share-btn">Share on X</button>
+          <button class="btn btn-secondary" id="restart-btn">Take Quiz Again</button>
+        </div>
+      </div>
+      
+      <div class="quote">
+        "HUDL HUDL HUDL" ⚔️
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const questions = [
+      {
+        text: "What excites you most about Huddle01?",
+        options: [
+          "Running media nodes and providing bandwidth to the network",
+          "The technical infrastructure and decentralized architecture",
+          "Both the infrastructure and applications built on top",
+          "Building applications using Huddle01's SDKs",
+          "Creating new experiences for users with Huddle01's technology"
+        ],
+        type: "connectivity"
+      },
+      {
+        text: "When you think about contributing to Huddle01, you're most interested in:",
+        options: [
+          "Setting up and optimizing media nodes",
+          "Understanding and improving the network's infrastructure",
+          "Both technical operations and user-facing applications",
+          "Developing features for existing Huddle01 applications",
+          "Building entirely new applications on Huddle01's network"
+        ],
+        type: "connectivity"
+      },
+      {
+        text: "In a Huddle01 technical discussion, you're most likely to:",
+        options: [
+          "Share tips on running nodes more efficiently",
+          "Discuss ways to optimize bandwidth contribution",
+          "Talk about both infrastructure and applications",
+          "Suggest new features for Huddle01 applications",
+          "Propose entirely new applications for the ecosystem"
+        ],
+        type: "connectivity"
+      },
+      {
+        text: "You believe the strength of Huddle01 comes from:",
+        options: [
+          "Its decentralized media node infrastructure",
+          "The reliability and efficiency of the network",
+          "A balance between infrastructure and applications",
+          "The variety of applications possible on the network",
+          "The revolutionary user experiences that can be built"
+        ],
+        type: "connectivity"
+      },
+      {
+        text: "Your ideal contribution to the HUDLverse would be:",
+        options: [
+          "Running multiple high-performance media nodes",
+          "Helping optimize the core infrastructure",
+          "Working on both infrastructure and applications",
+          "Developing new features for Huddle01 apps",
+          "Creating a groundbreaking new application on the network"
+        ],
+        type: "connectivity"
+      },
+      {
+        text: "Your involvement with Huddle01 is best described as:",
+        options: [
+          "Just discovering what it's all about",
+          "Actively learning and participating when possible",
+          "Regularly contributing and helping others",
+          "Taking initiative on projects and organizing events",
+          "Leading significant initiatives and guiding the community"
+        ],
+        type: "engagement"
+      },
+      {
+        text: "In community discussions, you typically:",
+        options: [
+          "Observe and ask questions to learn more",
+          "Participate and share your developing thoughts",
+          "Actively contribute and help answer others' questions",
+          "Start discussions and share comprehensive insights",
+          "Guide conversations and help resolve complex questions"
+        ],
+        type: "engagement"
+      },
+      {
+        text: "When it comes to Huddle01 events:",
+        options: [
+          "You're just starting to attend them",
+          "You regularly participate in community events",
+          "You're active in most events and sometimes help organize",
+          "You often organize events and encourage others to join",
+          "You lead major events and create new event concepts"
+        ],
+        type: "engagement"
+      },
+      {
+        text: "Your content creation for Huddle01 involves:",
+        options: [
+          "Mostly consuming content created by others",
+          "Occasionally sharing or commenting on official content",
+          "Regularly creating simple content like memes or short posts",
+          "Frequently creating high-quality content like guides or videos",
+          "Consistently producing influential content that educates the community"
+        ],
+        type: "engagement"
+      },
+      {
+        text: "Your relationship with other HUDLers is:",
+        options: [
+          "Just starting to connect with a few community members",
+          "Known to and friendly with several active members",
+          "Well-connected with many members across the community",
+          "Recognized as a key community member who helps many others",
+          "Viewed as a mentor and guide to significant portions of the community"
+        ],
+        type: "engagement"
+      }
+    ];
+    
+    const alignments = {
+      "Node Operator Explorer": {
+        description: "You're fascinated by the technical infrastructure of Huddle01 and are learning how to contribute bandwidth through media nodes. You're new to the community but eager to understand how the decentralized network operates.",
+        ability: "Bandwidth Apprentice - You absorb technical knowledge quickly and are building the foundation to become a crucial node operator."
+      },
+      "Node Operator HUDLer": {
+        description: "You're a reliable contributor of bandwidth to the network, running stable media nodes that help power Huddle01's real-time connectivity. You actively participate in operator discussions and technical improvements.",
+        ability: "Steady Signal - Your consistent contributions make you a backbone of the network's reliability."
+      },
+      "Node Operator Elder": {
+        description: "You're a technical luminary who not only operates multiple high-performance nodes but also guides others in optimizing their contributions. Your deep infrastructure knowledge makes you a respected advisor on network improvements.",
+        ability: "Connectivity Sage - Your wisdom about optimization and troubleshooting helps the entire node operator community."
+      },
+      "Balanced Explorer": {
+        description: "You're curious about all aspects of Huddle01, from running nodes to building applications. You're still learning but show interest in both the technical infrastructure and its practical applications.",
+        ability: "Versatile Learner - Your broad curiosity allows you to connect ideas from different parts of the ecosystem."
+      },
+      "True HUDLer": {
+        description: "You're at the heart of the community, actively contributing to both infrastructure and applications. You participate regularly in events, create content, and help newcomers find their place in the ecosystem.",
+        ability: "Community Cornerstone - Your balanced approach and active presence strengthens the entire HUDL Army."
+      },
+      "Balanced Elder": {
+        description: "You're a venerated member who understands all aspects of the Huddle01 ecosystem deeply. You guide others in both technical operations and application development, while actively leading community initiatives.",
+        ability: "Wisdom of Balance - Your comprehensive knowledge allows you to see synergies others miss and guide the community toward holistic growth."
+      },
+      "dApp Builder Explorer": {
+        description: "You're a creative newcomer excited about building on Huddle01's powerful SDKs. You're experimenting with applications and learning how to leverage the network's real-time connectivity capabilities.",
+        ability: "Innovation Spark - Your fresh perspective brings creative new application ideas to the ecosystem."
+      },
+      "dApp Builder HUDLer": {
+        description: "You're actively developing applications that harness Huddle01's low-latency network. Your contributions help showcase the practical value of the ecosystem and expand its use cases.",
+        ability: "Solution Architect - You excel at turning concepts into functional applications that meet real user needs."
+      },
+      "dApp Builder Elder": {
+        description: "You're a visionary creating revolutionary applications that push the boundaries of what's possible with Huddle01's technology. Your creations inspire others and drive adoption of the entire ecosystem.",
+        ability: "Visionary Creator - Your applications demonstrate the full potential of decentralized real-time connectivity and set standards for others to follow."
+      }
+    };
+    
+    // Variables to track quiz state
+    let currentQuestion = 0;
+    let answers = Array(questions.length).fill(0);
+    let username = '';
+    
+    // DOM elements
+    const startBtn = document.getElementById('start-btn');
+    const prevBtn = document.getElementById('prev-btn');
+    const nextBtn = document.getElementById('next-btn');
+    const shareBtn = document.getElementById('share-btn');
+    const restartBtn = document.getElementById('restart-btn');
+    const twitterInput = document.getElementById('twitter-handle');
+    const questionContainer = document.getElementById('question-container');
+    const progressBar = document.getElementById('progress');
+    const alignmentTitle = document.getElementById('alignment-title');
+    const alignmentDescription = document.getElementById('alignment-description');
+    const specialAbility = document.getElementById('special-ability');
+
+    // Initialize
+    updateButtonStates();
+
+    // Event listeners
+    startBtn.addEventListener('click', startQuiz);
+    prevBtn.addEventListener('click', previousQuestion);
+    nextBtn.addEventListener('click', nextQuestion);
+    shareBtn.addEventListener('click', shareResult);
+    restartBtn.addEventListener('click', restartQuiz);
+
+    function startQuiz() {
+      username = twitterInput.value.trim();
+      if (!username) {
+        alert('Please enter your X handle to continue.');
+        return;
+      }
+      
+      showStep(2);
+      renderQuestion();
+    }
+
+    function renderQuestion() {
+      const question = questions[currentQuestion];
+      let html = `
+        <div class="question">
+          <div class="question-text">${currentQuestion + 1}. ${question.text}</div>
+          <div class="options">
+      `;
+      
+      for (let i = 0; i < question.options.length; i++) {
+        const isSelected = answers[currentQuestion] === i + 1;
+        html += `
+          <div class="option ${isSelected ? 'selected' : ''}" data-value="${i + 1}">
+            ${question.options[i]}
+          </div>
+        `;
+      }
+      
+      html += `</div></div>`;
+      questionContainer.innerHTML = html;
+      
+      // Add event listeners to options
+      const options = document.querySelectorAll('.option');
+      options.forEach(option => {
+        option.addEventListener('click', () => {
+          const value = parseInt(option.getAttribute('data-value'));
+          answers[currentQuestion] = value;
+          renderQuestion();
+          updateButtonStates();
+        });
+      });
+      
+      // Update progress bar
+      const progress = ((currentQuestion + 1) / questions.length) * 100;
+      progressBar.style.width = `${progress}%`;
+      
+      updateButtonStates();
+    }
+
+    function previousQuestion() {
+      if (currentQuestion > 0) {
+        currentQuestion--;
+        renderQuestion();
+      }
+    }
+
+    function nextQuestion() {
+      if (answers[currentQuestion] === 0) {
+        alert('Please select an answer before proceeding.');
+        return;
+      }
+      
+      if (currentQuestion < questions.length - 1) {
+        currentQuestion++;
+        renderQuestion();
+      } else {
+        calculateResult();
+      }
+    }
+
+    function calculateResult() {
+      // Calculate connectivity score (questions 0-4)
+      let connectivityScore = 0;
+      for (let i = 0; i < 5; i++) {
+        connectivityScore += answers[i];
+      }
+      
+      // Calculate engagement score (questions 5-9)
+      let engagementScore = 0;
+      for (let i = 5; i < 10; i++) {
+        engagementScore += answers[i];
+      }
+      
+      // Determine connectivity axis
+      let connectivityType;
+      if (connectivityScore <= 9) {
+        connectivityType = "Node Operator";
+      } else if (connectivityScore <= 15) {
+        connectivityType = "Node Operator";
+      } else if (connectivityScore <= 17) {
+        connectivityType = "Balanced";
+      } else if (connectivityScore <= 22) {
+        connectivityType = "dApp Builder";
+      } else {
+        connectivityType = "dApp Builder";
+      }
+      
+      // Determine engagement axis
+      let engagementType;
+      if (engagementScore <= 9) {
+        engagementType = "Explorer";
+      } else if (engagementScore <= 15) {
+        engagementType = "HUDLer";
+      } else if (engagementScore <= 20) {
+        engagementType = "HUDLer";
+      } else {
+        engagementType = "Elder";
+      }
+      
+      // Special case for True HUDLer
+      if (connectivityType === "Balanced" && engagementType === "HUDLer") {
+        engagementType = "HUDLer"; // To make it "True HUDLer"
+      }
+      
+      const alignment = `${connectivityType} ${engagementType}`;
+      
+      // Display result
+      alignmentTitle.textContent = alignment;
+      alignmentDescription.textContent = alignments[alignment].description;
+      specialAbility.textContent = alignments[alignment].ability;
+      
+      // Highlight the correct cell in the alignment grid
+      const cells = document.querySelectorAll('.alignment-cell');
+      cells.forEach(cell => {
+        cell.classList.remove('highlighted');
+        if (cell.getAttribute('data-alignment') === alignment) {
+          cell.classList.add('highlighted');
+        }
+      });
+      
+      showStep(3);
+    }
+
+    function shareResult() {
+      const alignment = alignmentTitle.textContent;
+      const tweetText = `I just discovered my HUDL Army alignment: ${alignment}! Find out yours at https://huddle01.com/alignment-quiz #MyHUDLAlignment #HUDL $HUDL @huddle01com`;
+      
+      window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(tweetText)}`, '_blank');
+    }
+
+    function restartQuiz() {
+      currentQuestion = 0;
+      answers = Array(questions.length).fill(0);
+      showStep(1);
+    }
+
+    function showStep(step) {
+      document.querySelectorAll('.step').forEach(el => {
+        el.classList.remove('active');
+      });
+      document.getElementById(`step-${step}`).classList.add('active');
+    }
+
+    function updateButtonStates() {
+      prevBtn.disabled = currentQuestion === 0;
+      
+      if (currentQuestion === questions.length - 1) {
+        nextBtn.textContent = "See Results";
+      } else {
+        nextBtn.textContent = "Next";
+      }
+      
+      nextBtn.disabled = answers[currentQuestion] === 0;
+    }
+  </script>
+</body>
+</html>
